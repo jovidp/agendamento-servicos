@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sistema acadêmico de agendamento de serviços com cadastro, login, 2FA, perfis, logs e acessibilidade."
+    />
+    <title>AgendaFácil | Sistema de Agendamento</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="topbar">
+      <div class="brand" role="banner">
+        <div class="brand-mark" aria-hidden="true">AF</div>
+        <div>
+          <strong>AgendaFácil</strong>
+          <span>Agendamento de Serviços</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="accessibility" aria-label="Acessibilidade">
+          <button
+            type="button"
+            class="icon-btn"
+            id="btnContrast"
+            aria-pressed="false"
+            title="Alternar contraste"
+          >
+            ◐
+          </button>
+          <button
+            type="button"
+            class="icon-btn"
+            id="btnFontDown"
+            title="Diminuir fonte"
+          >
+            A−
+          </button>
+          <button
+            type="button"
+            class="icon-btn"
+            id="btnFontUp"
+            title="Aumentar fonte"
+          >
+            A+
+          </button>
+        </div>
+        <div id="userBadge" class="user-badge hidden" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <nav id="mainNav" class="main-nav" aria-label="Menu principal">
+      <button type="button" data-view="home" class="nav-link active">
+        Início
+      </button>
+      <button type="button" data-view="login" class="nav-link guest-only">
+        Login
+      </button>
+      <button type="button" data-view="register" class="nav-link guest-only">
+        Cadastro
+      </button>
+
+      <button
+        type="button"
+        data-view="schedule"
+        class="nav-link auth-only hidden"
+      >
+        Agendar
+      </button>
+      <button
+        type="button"
+        data-view="appointments"
+        class="nav-link auth-only hidden"
+      >
+        Agendamentos
+      </button>
+      <button
+        type="button"
+        data-view="users"
+        class="nav-link master-only hidden"
+      >
+        Usuários
+      </button>
+      <button
+        type="button"
+        data-view="services-admin"
+        class="nav-link master-only hidden"
+      >
+        Serviços
+      </button>
+      <button
+        type="button"
+        data-view="logs"
+        class="nav-link master-only hidden"
+      >
+        Logs
+      </button>
+      <button
+        type="button"
+        data-view="password"
+        class="nav-link common-only hidden"
+      >
+        Alterar senha
+      </button>
+      <button
+        type="button"
+        data-view="database"
+        class="nav-link auth-only hidden"
+      >
+        Modelo do BD
+      </button>
+      <button
+        type="button"
+        id="btnLogout"
+        class="nav-link danger-link auth-only hidden"
+      >
+        Logout
+      </button>
+    </nav>
+
+    <main id="conteudo" class="container">
+      <!-- INÍCIO -->
+      <section
+        id="view-home"
+        class="view active-view"
+        aria-labelledby="homeTitle"
+      >
+        <div class="hero">
+          <div>
+            <span class="eyebrow">Atendimento simples e organizado</span>
+            <h1 id="homeTitle">Agende seus serviços em poucos cliques</h1>
+            <p>
+              Consulte os serviços, escolha data e horário e acompanhe seus
+              agendamentos em um só lugar.
+            </p>
+            <div class="hero-actions">
+              <button
+                type="button"
+                class="btn primary guest-only"
+                data-view="register"
+              >
+                Criar cadastro
+              </button>
+              <button
+                type="button"
+                class="btn secondary guest-only"
+                data-view="login"
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                class="btn primary auth-only hidden"
+                data-view="schedule"
+              >
+                Novo agendamento
+              </button>
+            </div>
+          </div>
+          <div class="hero-card" aria-label="Resumo dos recursos">
+            <div><strong>2FA</strong><span>Mais segurança no acesso</span></div>
+            <div><strong>Responsivo</strong><span>Desktop e celular</span></div>
+            <div><strong>Perfis</strong><span>Master e comum</span></div>
+          </div>
+        </div>
+
+        <section class="section-block" aria-labelledby="servicesTitle">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Serviços</span>
+              <h2 id="servicesTitle">Escolha o atendimento ideal</h2>
+            </div>
+          </div>
+          <div id="serviceCards" class="card-grid"></div>
+        </section>
+      </section>
+
+      <!-- CADASTRO -->
+      <section id="view-register" class="view" aria-labelledby="registerTitle">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Novo cliente</span>
+              <h1 id="registerTitle">Cadastro de usuário</h1>
+              <p>O cadastro pelo site cria apenas usuários do perfil comum.</p>
+            </div>
+          </div>
+
+          <form id="registerForm" novalidate>
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="fullName">Nome completo *</label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  minlength="15"
+                  maxlength="80"
+                  autocomplete="name"
+                  required
+                />
+                <small>Entre 15 e 80 caracteres alfabéticos.</small>
+              </div>
+
+              <div class="field">
+                <label for="birthDate">Data de nascimento *</label>
+                <input id="birthDate" name="birthDate" type="date" required />
+              </div>
+
+              <div class="field">
+                <label for="sex">Sexo *</label>
+                <select id="sex" name="sex" required>
+                  <option value="">Selecione</option>
+                  <option>Feminino</option>
+                  <option>Masculino</option>
+                  <option>Outro</option>
+                  <option>Prefiro não informar</option>
+                </select>
+              </div>
+
+              <div class="field span-2">
+                <label for="motherName">Nome materno *</label>
+                <input
+                  id="motherName"
+                  name="motherName"
+                  type="text"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="cpf">CPF *</label>
+                <input
+                  id="cpf"
+                  name="cpf"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="000.000.000-00"
+                  maxlength="14"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="email">E-mail *</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="cellPhone">Telefone celular *</label>
+                <input
+                  id="cellPhone"
+                  name="cellPhone"
+                  type="tel"
+                  placeholder="(+55)21-99999999"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="landline">Telefone fixo *</label>
+                <input
+                  id="landline"
+                  name="landline"
+                  type="tel"
+                  placeholder="(+55)21-33333333"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="cep">CEP *</label>
+                <div class="inline-field">
+                  <input
+                    id="cep"
+                    name="cep"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="00000-000"
+                    maxlength="9"
+                    required
+                  />
+                  <button
+                    class="btn secondary compact"
+                    id="btnCep"
+                    type="button"
+                  >
+                    Buscar CEP
+                  </button>
+                </div>
+                <small
+                  >Se a consulta falhar, o endereço pode ser preenchido
+                  manualmente.</small
+                >
+              </div>
+
+              <div class="field">
+                <label for="number">Número *</label>
+                <input id="number" name="number" type="text" required />
+              </div>
+
+              <div class="field span-2">
+                <label for="street">Logradouro *</label>
+                <input id="street" name="street" type="text" required />
+              </div>
+
+              <div class="field">
+                <label for="neighborhood">Bairro *</label>
+                <input
+                  id="neighborhood"
+                  name="neighborhood"
+                  type="text"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="city">Cidade *</label>
+                <input id="city" name="city" type="text" required />
+              </div>
+
+              <div class="field">
+                <label for="state">UF *</label>
+                <input
+                  id="state"
+                  name="state"
+                  type="text"
+                  maxlength="2"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="complement">Complemento</label>
+                <input id="complement" name="complement" type="text" />
+              </div>
+
+              <div class="field">
+                <label for="newLogin">Login *</label>
+                <input
+                  id="newLogin"
+                  name="newLogin"
+                  type="text"
+                  minlength="6"
+                  maxlength="6"
+                  autocomplete="username"
+                  required
+                />
+                <small>Exatamente 6 letras.</small>
+              </div>
+
+              <div class="field">
+                <label for="newPassword">Senha *</label>
+                <input
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  minlength="8"
+                  maxlength="8"
+                  autocomplete="new-password"
+                  required
+                />
+                <small>Exatamente 8 letras.</small>
+              </div>
+
+              <div class="field span-2">
+                <label for="confirmPassword">Confirmação da senha *</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  minlength="8"
+                  maxlength="8"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Enviar cadastro</button>
+              <button type="reset" class="btn secondary">Limpar tela</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- LOGIN -->
+      <section id="view-login" class="view" aria-labelledby="loginTitle">
+        <div class="auth-panel">
+          <span class="eyebrow">Acesso ao sistema</span>
+          <h1 id="loginTitle">Login</h1>
+          <p>Informe seu login e senha para continuar.</p>
+          <form id="loginForm" novalidate>
+            <div class="field">
+              <label for="loginUser">Login</label>
+              <input
+                id="loginUser"
+                name="loginUser"
+                type="text"
+                maxlength="6"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="loginPassword">Senha</label>
+              <input
+                id="loginPassword"
+                name="loginPassword"
+                type="password"
+                maxlength="8"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+            <div class="form-actions stack-mobile">
+              <button type="submit" class="btn primary">Entrar</button>
+              <button type="reset" class="btn secondary">Limpar</button>
+            </div>
+          </form>
+          <p class="auth-footer">
+            Cliente novo?
+            <button type="button" class="link-btn" data-view="register">
+              Cadastre-se aqui</button
+            >.
+          </p>
+          <div class="demo-credentials">
+            <strong>Acesso Master para demonstração</strong>
+            <span
+              >Login: <code>master</code> | Senha: <code>adminabc</code></span
+            >
+            <span
+              >2FA: mãe <code>Maria Administradora</code> • nascimento
+              <code>01/01/1990</code> • CEP <code>20000-000</code></span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- 2FA -->
+      <section id="view-twofa" class="view" aria-labelledby="twofaTitle">
+        <div class="auth-panel">
+          <span class="eyebrow">Segundo fator de autenticação</span>
+          <h1 id="twofaTitle">Confirme sua identidade</h1>
+          <p id="twofaQuestion" class="security-question"></p>
+          <form id="twofaForm" novalidate>
+            <div class="field">
+              <label for="twofaAnswer">Resposta</label>
+              <input id="twofaAnswer" type="text" autocomplete="off" required />
+            </div>
+            <button type="submit" class="btn primary full">Confirmar</button>
+            <p id="twofaAttempts" class="attempts" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <!-- AGENDAR -->
+      <section id="view-schedule" class="view" aria-labelledby="scheduleTitle">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Novo atendimento</span>
+              <h1 id="scheduleTitle">Agendar serviço</h1>
+            </div>
+          </div>
+          <form id="scheduleForm" novalidate>
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="serviceSelect">Serviço *</label>
+                <select id="serviceSelect" required></select>
+              </div>
+              <div class="field">
+                <label for="appointmentDate">Data *</label>
+                <input id="appointmentDate" type="date" required />
+              </div>
+              <div class="field">
+                <label for="appointmentTime">Horário *</label>
+                <select id="appointmentTime" required>
+                  <option value="">Selecione</option>
+                  <option>09:00</option>
+                  <option>10:00</option>
+                  <option>11:00</option>
+                  <option>13:00</option>
+                  <option>14:00</option>
+                  <option>15:00</option>
+                  <option>16:00</option>
+                  <option>17:00</option>
+                  <option>18:00</option>
+                </select>
+              </div>
+              <div class="field span-2">
+                <label for="appointmentNotes">Observações</label>
+                <textarea
+                  id="appointmentNotes"
+                  rows="4"
+                  placeholder="Alguma preferência ou observação para o atendimento?"
+                ></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary">
+                Confirmar agendamento
+              </button>
+              <button type="reset" class="btn secondary">Limpar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- AGENDAMENTOS -->
+      <section
+        id="view-appointments"
+        class="view"
+        aria-labelledby="appointmentsTitle"
+      >
+        <div class="panel">
+          <div class="section-heading actions-heading">
+            <div>
+              <span class="eyebrow">Agenda</span>
+              <h1 id="appointmentsTitle">Agendamentos</h1>
+              <p id="appointmentsSubtitle"></p>
+            </div>
+            <button type="button" class="btn primary" data-view="schedule">
+              Novo agendamento
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Serviço</th>
+                  <th>Data</th>
+                  <th>Horário</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- USUÁRIOS -->
+      <section id="view-users" class="view" aria-labelledby="usersTitle">
+        <div class="panel">
+          <div class="section-heading actions-heading">
+            <div>
+              <span class="eyebrow">Administração</span>
+              <h1 id="usersTitle">Consulta de usuários</h1>
+              <p>Pesquisa por substring do nome dos usuários comuns.</p>
+            </div>
+            <button type="button" id="btnUsersPdf" class="btn secondary">
+              Baixar lista em PDF
+            </button>
+          </div>
+          <div class="search-row">
+            <label for="userSearch">Buscar usuário</label>
+            <input
+              id="userSearch"
+              type="search"
+              placeholder="Digite parte do nome"
+            />
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Login</th>
+                  <th>E-mail</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SERVIÇOS (MASTER) -->
+      <section
+        id="view-services-admin"
+        class="view"
+        aria-labelledby="servicesAdminTitle"
+      >
+        <div class="panel">
+          <div class="section-heading actions-heading">
+            <div>
+              <span class="eyebrow">Administração</span>
+              <h1 id="servicesAdminTitle">Gerenciar serviços</h1>
+              <p>Cadastre, edite ou desative os serviços disponíveis para os clientes.</p>
+            </div>
+          </div>
+
+          <form id="serviceForm" class="service-form" novalidate>
+            <input id="serviceId" type="hidden" />
+            <div class="form-grid">
+              <div class="field">
+                <label for="serviceName">Nome *</label>
+                <input id="serviceName" type="text" maxlength="60" required />
+              </div>
+              <div class="field">
+                <label for="serviceIcon">Ícone</label>
+                <input id="serviceIcon" type="text" maxlength="4" value="★" aria-describedby="serviceIconHelp" />
+                <small id="serviceIconHelp">Use um emoji ou símbolo curto.</small>
+              </div>
+              <div class="field">
+                <label for="serviceDuration">Duração (minutos) *</label>
+                <input id="serviceDuration" type="number" min="5" max="480" step="5" required />
+              </div>
+              <div class="field">
+                <label for="servicePrice">Valor (R$) *</label>
+                <input id="servicePrice" type="number" min="0" max="99999" step="0.01" required />
+              </div>
+              <div class="field span-2">
+                <label for="serviceDescription">Descrição *</label>
+                <textarea id="serviceDescription" rows="3" maxlength="180" required></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="serviceSubmit">Adicionar serviço</button>
+              <button type="reset" class="btn secondary" id="serviceCancelEdit">Limpar</button>
+            </div>
+          </form>
+
+          <div class="table-wrap service-admin-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serviço</th>
+                  <th>Duração</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="servicesAdminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALTERAR SENHA -->
+      <section id="view-password" class="view" aria-labelledby="passwordTitle">
+        <div class="auth-panel">
+          <span class="eyebrow">Conta</span>
+          <h1 id="passwordTitle">Alteração de senha</h1>
+          <p>Somente o próprio usuário comum pode alterar sua senha.</p>
+          <form id="passwordForm" novalidate>
+            <div class="field">
+              <label for="currentPassword">Senha atual *</label>
+              <input
+                id="currentPassword"
+                type="password"
+                maxlength="8"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="changedPassword">Nova senha *</label>
+              <input
+                id="changedPassword"
+                type="password"
+                maxlength="8"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="changedPasswordConfirm">Confirmar nova senha *</label>
+              <input
+                id="changedPasswordConfirm"
+                type="password"
+                maxlength="8"
+                required
+              />
+            </div>
+            <button type="submit" class="btn primary full">
+              Alterar senha
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- LOGS -->
+      <section id="view-logs" class="view" aria-labelledby="logsTitle">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Auditoria</span>
+              <h1 id="logsTitle">Logs de autenticação</h1>
+              <p>Entradas mais recentes primeiro.</p>
+            </div>
+          </div>
+          <div class="filter-grid">
+            <div class="field">
+              <label for="logFilterType">Filtrar por</label>
+              <select id="logFilterType">
+                <option value="all">Todos</option>
+                <option value="name">Nome</option>
+                <option value="cpf">CPF</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="logFilterValue">Valor da busca</label>
+              <input
+                id="logFilterValue"
+                type="search"
+                placeholder="Digite para pesquisar"
+              />
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Dia e hora</th>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>2FA</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODELO DO BD -->
+      <section id="view-database" class="view" aria-labelledby="databaseTitle">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Documentação</span>
+              <h1 id="databaseTitle">Modelo do banco de dados</h1>
+              <p>
+                Representação visual simplificada para o sistema de agendamento.
+              </p>
+            </div>
+          </div>
+          <div
+            class="diagram"
+            role="img"
+            aria-label="Diagrama simplificado com Usuário, Serviço, Agendamento e Log de Autenticação"
+          >
+            <svg viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker
+                  id="arrow"
+                  markerWidth="10"
+                  markerHeight="10"
+                  refX="8"
+                  refY="3"
+                  orient="auto"
+                  markerUnits="strokeWidth"
+                >
+                  <path d="M0,0 L0,6 L9,3 z" fill="currentColor" />
+                </marker>
+              </defs>
+              <g class="db-box">
+                <rect x="60" y="70" width="260" height="180" rx="16" />
+                <text x="85" y="105" class="db-title">USUARIO</text>
+                <text x="85" y="135">PK id_usuario</text>
+                <text x="85" y="160">nome, cpf, email</text>
+                <text x="85" y="185">login, senha_hash</text>
+                <text x="85" y="210">perfil, dados_2fa</text>
+              </g>
+              <g class="db-box">
+                <rect x="680" y="70" width="260" height="150" rx="16" />
+                <text x="705" y="105" class="db-title">SERVICO</text>
+                <text x="705" y="135">PK id_servico</text>
+                <text x="705" y="160">nome, descricao</text>
+                <text x="705" y="185">duracao, valor</text>
+              </g>
+              <g class="db-box">
+                <rect x="365" y="330" width="280" height="170" rx="16" />
+                <text x="390" y="365" class="db-title">AGENDAMENTO</text>
+                <text x="390" y="395">PK id_agendamento</text>
+                <text x="390" y="420">FK id_usuario</text>
+                <text x="390" y="445">FK id_servico</text>
+                <text x="390" y="470">data, horario, status</text>
+              </g>
+              <g class="db-box">
+                <rect x="60" y="350" width="240" height="135" rx="16" />
+                <text x="85" y="385" class="db-title">LOG_AUTH</text>
+                <text x="85" y="415">PK id_log</text>
+                <text x="85" y="440">FK id_usuario</text>
+                <text x="85" y="465">data_hora, fator_2fa</text>
+              </g>
+              <line
+                x1="320"
+                y1="155"
+                x2="690"
+                y2="155"
+                class="db-line"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="245"
+                y1="250"
+                x2="430"
+                y2="338"
+                class="db-line"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="760"
+                y1="220"
+                x2="590"
+                y2="338"
+                class="db-line"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="180"
+                y1="250"
+                x2="180"
+                y2="350"
+                class="db-line"
+                marker-end="url(#arrow)"
+              />
+              <text x="475" y="140" class="db-relation">consulta/agenda</text>
+              <text x="290" y="290" class="db-relation">1:N</text>
+              <text x="670" y="285" class="db-relation">1:N</text>
+              <text x="195" y="310" class="db-relation">1:N</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ERRO -->
+      <section id="view-error" class="view" aria-labelledby="errorTitle">
+        <div class="error-panel">
+          <div class="error-icon">!</div>
+          <h1 id="errorTitle">Algo inesperado aconteceu</h1>
+          <p id="errorMessage">Não foi possível concluir a operação.</p>
+          <button type="button" class="btn primary" data-view="login">
+            Voltar ao login
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <div
+      id="toastContainer"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <div
+      id="confirmModal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmTitle"
+    >
+      <div class="modal-card">
+        <h2 id="confirmTitle">Confirmar ação</h2>
+        <p id="confirmText"></p>
+        <div class="form-actions">
+          <button type="button" id="confirmYes" class="btn danger">
+            Confirmar
+          </button>
+          <button type="button" id="confirmNo" class="btn secondary">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Projeto acadêmico demonstrativo • Front-End HTML, CSS e JavaScript</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
